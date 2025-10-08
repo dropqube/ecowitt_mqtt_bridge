@@ -5,7 +5,7 @@ from homeassistant.const import (
 )
 
 DOMAIN = "ecowitt_mqtt_bridge"
-PLATFORMS: list[str] = ["sensor", "binary_sensor"]
+PLATFORMS: list[str] = []
 
 CONF_BROKER = "broker"
 CONF_PORT = "port"
@@ -48,4 +48,5 @@ DEFAULTS = {
     CONF_UNIT_RAIN: None,
     CONF_UNIT_PRESS: None,
 }
+
 
