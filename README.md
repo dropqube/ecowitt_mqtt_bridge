@@ -1,18 +1,19 @@
 # Ecowitt MQTT Bridge (Custom Integration)
 A lightweight **Home Assistant integration** that listens to **Ecowitt flat MQTT uploads**
 (e.g. from GW1100, GW2000, GW3000) and publishes **MQTT Discovery sensors** automatically.
-Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assistant MQTT Discovery** sensors with correct units (HA system units by default, optional overrides).
+Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assistant MQTT Discovery** sensors with correct units (HA system units by default, optional overrides). The bridge keeps MQTT as the primary data source and augments it with the Ecowitt LAN API for device metadata where available.
 
 ## ✨ Features
 
-- Parses Ecowitt flat MQTT payloads (`ecowitt/#`)
-- Auto-creates Home Assistant sensors via MQTT Discovery
-- Adapts units to your HA system settings (metric/imperial)
-- Optional unit overrides in the config
+- Parses Ecowitt flat MQTT payloads (`ecowitt/#`) and publishes retained HA MQTT discovery messages
+- Creates dedicated Home Assistant devices for the gateway and known outdoor sensor heads (WH90 / WH69) when available
+- Adapts units to your HA system settings (metric/imperial) with optional per-measurement overrides
+- Uses the Ecowitt LAN API as a metadata-only fallback for device names, IDs and signal quality
+- Allows new MQTT keys to be added via configuration for quick compatibility with new firmware
 - No external dependencies — uses HA’s MQTT integration
 
 ---
-##Prerequisites
+## Prerequisites
 
 - latest firmware on your Ecowitt Gateway
 - Log into your Gateway
@@ -40,31 +41,69 @@ Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assi
 4. Go to **Settings → Devices & Services → Add Integration → Ecowitt MQTT Bridge**.
 5. Configure:
    - **In topic**: `ecowitt/#` (or your exact topic like `ecowitt/048308785133`)
-   - Optional unit overrides (leave blank to follow HA).
+   - Optional LAN access (base URL + refresh interval) for additional device metadata
+   - Optional unit overrides (leave blank to follow HA)
+   - Optional custom sensor definitions (JSON list)
 
 ---
 
 ## ⚙️ Configuration
 
 | Option | Description | Default |
-|--------|--------------|----------|
+|--------|-------------|---------|
 | `in_topic` | MQTT topic to listen on (e.g. `ecowitt/#`) | `ecowitt/#` |
 | `discovery_prefix` | MQTT discovery prefix | `homeassistant` |
 | `state_prefix` | MQTT state prefix | `ecowitt_ha` |
+| `use_local_api` | Enable LAN mapper for device metadata fallback | `False` |
+| `base_url` | Gateway base URL (e.g. `http://192.168.0.46`) | empty |
+| `lan_timeout` | Timeout for LAN calls (seconds) | `5` |
+| `map_refresh_sec` | Poll interval for LAN sensor map (seconds) | `600` |
 | `unit_temperature` | Override (C / F) | follow HA |
 | `unit_wind` | Override (m/s / km/h / mph) | follow HA |
 | `unit_rain` | Override (mm / in) | follow HA |
 | `unit_pressure` | Override (hPa / inHg) | follow HA |
+| `custom_sensors` | JSON array with additional MQTT keys / metadata | empty |
+
+### Custom sensors
+
+Some Ecowitt firmware versions introduce new MQTT keys before the integration is updated. You can add them yourself by
+providing JSON in the **Custom sensors** field. Example:
+
+```json
+[
+  {
+    "key": "soilmoisture1",
+    "name": "Soil Moisture 1",
+    "device": "gateway",
+    "convert": "float",
+    "unit": "%",
+    "precision": 1
+  },
+  {
+    "key": "temp2f",
+    "name": "Greenhouse Temperature",
+    "convert": "temperature_f",
+    "device": "hwid:B708"
+  }
+]
+```
+
+- `device` accepts `gateway`, `outdoor`, or `hwid:XXXX` to pin the entity to a specific sensor head when the LAN API reports it.
+- `convert` supports presets such as `float`, `temperature_f`, `temperature_c`, `pressure_inhg`, `wind_mph`, `rain_in`, `text`
+  and more.
+- `unit` overrides the displayed unit for generic `float`/`text` conversions.
+- `precision` controls rounding for `float` converters.
 
 ---
 
 ## Notes
 - Ensure your Gateway publishes to your MQTT broker (Ecowitt → MQTT upload).
-**- If you tested other bridges/add-ons before, consider clearing retained discovery topics to avoid duplicates.**
-- Pressure conversion assumes flat uploads use **inHg**; LAN responses (future mode) use **hPa**.
+- **If you tested other bridges/add-ons before, consider clearing retained discovery topics to avoid duplicates.**
+- Pressure conversion assumes flat uploads use **inHg**; LAN responses (fallback) use **hPa**.
 - Works with GW1100/GW2000/GW3000 MQTT uploads.
 - Uses HA’s built-in MQTT client (no external dependencies).
-- Units auto-convert to HA settings or user overrides.
+- Units auto-convert to HA settings or user overrides. Metric / imperial switching follows Home Assistant 2025 guidelines.
+- LAN polling failures are logged but do not break MQTT processing. When the LAN API is offline, all entities stay attached to the gateway device.
 
 ## Issues / Feedback
 Please open issues or feature requests in this repository.

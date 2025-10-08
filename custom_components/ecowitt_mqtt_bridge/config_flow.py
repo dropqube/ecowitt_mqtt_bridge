@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
     TextSelector, TextSelectorConfig, TextSelectorType,
@@ -10,36 +9,28 @@ from homeassistant.helpers.selector import (
     BooleanSelector
 )
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    DEFAULTS,
+    CONF_IN_TOPIC,
+    CONF_DISCOVERY_PREFIX,
+    CONF_STATE_PREFIX,
+    CONF_USE_LOCAL_API,
+    CONF_BASE_URL,
+    CONF_LAN_TIMEOUT,
+    CONF_MAP_REFRESH,
+    CONF_PUBLISH_LAN_COMMON,
+    CONF_UNIT_TEMP,
+    CONF_UNIT_WIND,
+    CONF_UNIT_RAIN,
+    CONF_UNIT_PRESS,
+    CONF_CUSTOM_SENSORS,
+)
 
-# Keys (falls noch nicht in const.py)
-CONF_IN_TOPIC = "in_topic"
-CONF_DISCOVERY_PREFIX = "discovery_prefix"
-CONF_STATE_PREFIX = "state_prefix"
-CONF_USE_LOCAL_API = "use_local_api"
-CONF_BASE_URL = "base_url"
-CONF_LAN_TIMEOUT = "lan_timeout"
-CONF_MAP_REFRESH_SEC = "map_refresh_sec"
-CONF_PUBLISH_LAN_COMMON = "publish_lan_common"
-CONF_UNIT_TEMPERATURE = "unit_temperature"
-CONF_UNIT_WIND = "unit_wind"
-CONF_UNIT_RAIN = "unit_rain"
-CONF_UNIT_PRESSURE = "unit_pressure"
-
-DEFAULTS = {
-    CONF_IN_TOPIC: "ecowitt/#",
-    CONF_DISCOVERY_PREFIX: "homeassistant",
-    CONF_STATE_PREFIX: "ecowitt_ha",
-    CONF_USE_LOCAL_API: False,
-    CONF_BASE_URL: "",
-    CONF_LAN_TIMEOUT: 5.0,        # float!
-    CONF_MAP_REFRESH_SEC: 600,     # int
-    CONF_PUBLISH_LAN_COMMON: False,
-    CONF_UNIT_TEMPERATURE: "",
-    CONF_UNIT_WIND: "",
-    CONF_UNIT_RAIN: "",
-    CONF_UNIT_PRESSURE: "",
-}
+# map_refresh_sec renamed constant in config schema
+CONF_MAP_REFRESH_SEC = CONF_MAP_REFRESH
+CONF_UNIT_TEMPERATURE = CONF_UNIT_TEMP
+CONF_UNIT_PRESSURE = CONF_UNIT_PRESS
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -59,10 +50,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_LAN_TIMEOUT: float(user_input.get(CONF_LAN_TIMEOUT, DEFAULTS[CONF_LAN_TIMEOUT])),
                 CONF_MAP_REFRESH_SEC: int(user_input.get(CONF_MAP_REFRESH_SEC, DEFAULTS[CONF_MAP_REFRESH_SEC])),
                 CONF_PUBLISH_LAN_COMMON: bool(user_input.get(CONF_PUBLISH_LAN_COMMON, DEFAULTS[CONF_PUBLISH_LAN_COMMON])),
-                CONF_UNIT_TEMPERATURE: str(user_input.get(CONF_UNIT_TEMPERATURE, "")),
-                CONF_UNIT_WIND: str(user_input.get(CONF_UNIT_WIND, "")),
-                CONF_UNIT_RAIN: str(user_input.get(CONF_UNIT_RAIN, "")),
-                CONF_UNIT_PRESSURE: str(user_input.get(CONF_UNIT_PRESSURE, "")),
+                CONF_UNIT_TEMPERATURE: str(user_input.get(CONF_UNIT_TEMPERATURE, DEFAULTS[CONF_UNIT_TEMPERATURE])),
+                CONF_UNIT_WIND: str(user_input.get(CONF_UNIT_WIND, DEFAULTS[CONF_UNIT_WIND])),
+                CONF_UNIT_RAIN: str(user_input.get(CONF_UNIT_RAIN, DEFAULTS[CONF_UNIT_RAIN])),
+                CONF_UNIT_PRESSURE: str(user_input.get(CONF_UNIT_PRESSURE, DEFAULTS[CONF_UNIT_PRESSURE])),
+                CONF_CUSTOM_SENSORS: str(user_input.get(CONF_CUSTOM_SENSORS, DEFAULTS[CONF_CUSTOM_SENSORS])),
             }
             return self.async_create_entry(title="Ecowitt MQTT Bridge", data=data)
 
@@ -96,6 +88,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT)),
             vol.Optional(CONF_UNIT_PRESSURE, default=""):
                 TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT)),
+            vol.Optional(CONF_CUSTOM_SENSORS, default=DEFAULTS[CONF_CUSTOM_SENSORS]):
+                TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT, multiline=True)),
         })
 
         return self.async_show_form(step_id="user", data_schema=schema)
