@@ -5,8 +5,6 @@
 - Published retained discovery payloads with availability topics and availability updates
 - Added custom sensor configuration to allow users to describe new MQTT keys without code changes
 - Implemented unit override handling (temperature, wind, rain, pressure) in line with Home Assistant 2025 guidelines
-- Added an options flow so existing installations can be updated without removing the integration and now publish availability
-  as `offline` immediately after startup to comply with the Home Assistant 2025 retained availability requirement
 - Improved documentation, translations, and error handling for LAN polling and MQTT processing
 
 ## 0.3.0
