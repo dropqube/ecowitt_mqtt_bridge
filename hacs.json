@@ -1,0 +1,7 @@
+{
+  "name": "Ecowitt MQTT Bridge",
+  "render_readme": true,
+  "country": [],
+  "domains": ["ecowitt_mqtt_bridge"],
+  "homeassistant": "2025.1.0"
+}
