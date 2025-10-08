@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from homeassistant.const import (
-    UnitOfTemperature, UnitOfSpeed, UnitOfPressure, UnitOfLength
+    UnitOfTemperature,
+    UnitOfSpeed,
+    UnitOfPressure,
+    UnitOfLength,
 )
 
 DOMAIN = "ecowitt_mqtt_bridge"
@@ -21,6 +24,7 @@ CONF_BASE_URL = "base_url"
 CONF_LAN_TIMEOUT = "lan_timeout"
 CONF_MAP_REFRESH = "map_refresh_sec"
 CONF_PUBLISH_LAN_COMMON = "publish_lan_common"
+CONF_CUSTOM_SENSORS = "custom_sensors"
 
 # Unit-Overrides (leer/None = HA-Systemeinheiten übernehmen)
 CONF_UNIT_TEMP = "unit_temperature"      # "C" | "F" | None
@@ -43,10 +47,11 @@ DEFAULTS = {
     CONF_LAN_TIMEOUT: 5.0,
     CONF_MAP_REFRESH: 600,
     CONF_PUBLISH_LAN_COMMON: False,
-    CONF_UNIT_TEMP: None,
-    CONF_UNIT_WIND: None,
-    CONF_UNIT_RAIN: None,
-    CONF_UNIT_PRESS: None,
+    CONF_UNIT_TEMP: "",
+    CONF_UNIT_WIND: "",
+    CONF_UNIT_RAIN: "",
+    CONF_UNIT_PRESS: "",
+    CONF_CUSTOM_SENSORS: "",
 }
 
 
