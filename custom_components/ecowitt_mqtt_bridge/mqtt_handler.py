@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from homeassistant.components import mqtt
+from homeassistant.components.mqtt.models import ReceiveMessage
 from homeassistant.const import (
     UnitOfLength,
     UnitOfPressure,
@@ -481,10 +482,28 @@ class EcowittBridgeRuntime:
     # -------------------------------------------------
 
     async def async_start(self) -> None:
-        async def _msg_received(topic: str, payload: bytes, qos: int) -> None:
-            text = payload.decode(errors="ignore")
+        async def _msg_received(msg: ReceiveMessage) -> None:
+            payload: Any = msg.payload
+
+            if isinstance(payload, str):
+                text = payload
+                raw_bytes = payload.encode()
+            elif isinstance(payload, (bytes, bytearray, memoryview)):
+                raw_bytes = bytes(payload)
+                text = raw_bytes.decode(errors="ignore")
+            elif payload is None:
+                raw_bytes = b""
+                text = ""
+            else:
+                text = str(payload)
+                raw_bytes = text.encode()
             raw = parse_flat_payload(text)
-            _LOGGER.debug("[RECV] topic=%s bytes=%d sample='%s...'", topic, len(payload), text[:80])
+            _LOGGER.debug(
+                "[RECV] topic=%s bytes=%d sample='%s...'",
+                msg.topic,
+                len(raw_bytes),
+                text[:80],
+            )
             await self._handle_flat_gateway(raw)
 
         self._unsub = await mqtt.async_subscribe(self.hass, self.in_topic, _msg_received, qos=0)
