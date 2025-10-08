@@ -483,13 +483,25 @@ class EcowittBridgeRuntime:
 
     async def async_start(self) -> None:
         async def _msg_received(msg: ReceiveMessage) -> None:
-            payload = msg.payload or b""
-            text = payload.decode(errors="ignore")
+            payload: Any = msg.payload
+
+            if isinstance(payload, str):
+                text = payload
+                raw_bytes = payload.encode()
+            elif isinstance(payload, (bytes, bytearray, memoryview)):
+                raw_bytes = bytes(payload)
+                text = raw_bytes.decode(errors="ignore")
+            elif payload is None:
+                raw_bytes = b""
+                text = ""
+            else:
+                text = str(payload)
+                raw_bytes = text.encode()
             raw = parse_flat_payload(text)
             _LOGGER.debug(
                 "[RECV] topic=%s bytes=%d sample='%s...'",
                 msg.topic,
-                len(payload),
+                len(raw_bytes),
                 text[:80],
             )
             await self._handle_flat_gateway(raw)
