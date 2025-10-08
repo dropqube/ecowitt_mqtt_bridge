@@ -22,7 +22,7 @@ Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assi
   -   Protocol Type: MQTT
   -   Host: ENTER YOUR HOME ASSISTANT IP ADRESS here, e.g. 192.168.0.40
   -   Port: ENTER YOUR MQTT PORT the default is **1883**
-  -   Publish Topic: ecwoitt/<NUMBER> <- there might already be a value here, just leave that in! You might need this entry for the configuration! So copy that to your clipboard
+  -   Publish Topic: ecowitt/NUMBER <- there might already be a value here, for example ecowitt/0912377902873, just leave that in! You might need this entry for the configuration! So copy that to your clipboard
   -   Transport: MQTT over TCP
   -   Upload Interval: choose your own. Less than 30s is usually useless, the default is 60s and should be sufficient
   -   Client Name: use default value or as you prefer
@@ -84,4 +84,5 @@ sensor.ecowitt_gateway_785133_uv_index
 
 
 MIT License © 2025 dropqube
+
 
