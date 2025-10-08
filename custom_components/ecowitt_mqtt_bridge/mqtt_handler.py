@@ -481,32 +481,13 @@ class EcowittBridgeRuntime:
     # -------------------------------------------------
 
     async def async_start(self) -> None:
-        async def _msg_received(message: mqtt.ReceiveMessage) -> None:
-            payload = message.payload
-            if isinstance(payload, bytes):
-                text = payload.decode(errors="ignore")
-            else:
-                text = str(payload)
+        async def _msg_received(topic: str, payload: bytes, qos: int) -> None:
+            text = payload.decode(errors="ignore")
             raw = parse_flat_payload(text)
-            payload_len = len(payload) if payload is not None else 0
-            _LOGGER.debug(
-                "[RECV] topic=%s bytes=%d sample='%s...'",
-                message.topic,
-                payload_len,
-                text[:80],
-            )
+            _LOGGER.debug("[RECV] topic=%s bytes=%d sample='%s...'", topic, len(payload), text[:80])
             await self._handle_flat_gateway(raw)
 
-        # Publish availability upfront (Home Assistant 2025 guideline) so HA
-        # immediately knows the bridge is awaiting data after a restart.
-        await self._publish_availability(False)
-        self._unsub = await mqtt.async_subscribe(
-            self.hass,
-            self.in_topic,
-            _msg_received,
-            qos=0,
-            encoding=None,
-        )
+        self._unsub = await mqtt.async_subscribe(self.hass, self.in_topic, _msg_received, qos=0)
         _LOGGER.info("[MQTT] Subscribed to %s", self.in_topic)
         if self._lan:
             await self._lan.async_start()
@@ -515,9 +496,8 @@ class EcowittBridgeRuntime:
         if self._unsub:
             self._unsub()
             self._unsub = None
-        # Always publish offline on shutdown to clear retained online state if no
-        # new payloads arrive after unloading the integration.
-        await self._publish_availability(False)
+        if self._availability_online:
+            await self._publish_availability(False)
         if self._lan:
             await self._lan.async_stop()
 

@@ -44,7 +44,6 @@ Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assi
    - Optional LAN access (base URL + refresh interval) for additional device metadata
    - Optional unit overrides (leave blank to follow HA)
    - Optional custom sensor definitions (JSON list)
-   - All settings can be adjusted later from the integration **Options** dialog
 
 ---
 

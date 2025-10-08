@@ -38,9 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
-    # Home Assistant 2025+: runtime should respect option overrides in addition
-    # to the original config data to allow adjustments from the options flow.
-    data: dict[str, Any] = {**DEFAULTS, **entry.data, **entry.options}
+    data: dict[str, Any] = {**DEFAULTS, **entry.data}
 
     runtime = EcowittBridgeRuntime(
         hass,
