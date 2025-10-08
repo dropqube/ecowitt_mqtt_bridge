@@ -12,6 +12,23 @@ Subscribe to **Ecowitt flat MQTT uploads** (e.g. GW3000) and publish **Home Assi
 - No external dependencies — uses HA’s MQTT integration
 
 ---
+##Prerequisites
+
+- latest firmware on your Ecowitt Gateway
+- Log into your Gateway
+- Go to -> Weather Services -> Scroll down to "Customized"
+- Settings:
+  -   Customized: Enabled
+  -   Protocol Type: MQTT
+  -   Host: <ENTER YOUR HOME ASSISTANT IP ADRESS>
+  -   Port: <ENTER YOUR MQTT PORT> the default is 1883
+  -   Publish Topic: ecwoitt/<NUMBER> <- there might already be a value here, just leave that in! You might need this entry for the configuration! So copy that to your clipboard
+  -   Transport: MQTT over TCP
+  -   Upload Interval: choose your own. Less than 30s is usually useless, the default is 60s and should be sufficient
+  -   Client Name: use default value or as you prefer
+  -   Username: NOTE: you shouldn't need a username. if it doesn't publish the topics, enter your mqtt user here
+  -   Password: see above, but enter the mqtt users password
+  -   Click Save
 
 ## Installation (HACS)
 1. In HACS → **Integrations → ⋮ → Custom repositories**  --- or check for availability (in that case don't add the custom repository)
@@ -64,5 +81,6 @@ sensor.ecowitt_gateway_785133_uv_index
 ---
 
 ## 🧾 License
+
 
 MIT License © 2025 dropqube
