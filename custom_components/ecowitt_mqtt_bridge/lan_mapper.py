@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 from aiohttp import ClientSession, ClientTimeout
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +29,14 @@ class EcowittLanMapper:
     pro Outdoor-Sensor (WH90/WH69) ein eigenes Gerät in HA erzeugen können.
     """
 
-    def __init__(self, base_url: str, timeout_sec: float, refresh_sec: int) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        base_url: str,
+        timeout_sec: float,
+        refresh_sec: int,
+    ) -> None:
+        self._hass = hass
         self._base = base_url.rstrip("/")
         self._timeout = ClientTimeout(total=timeout_sec)
         self._refresh = max(60, int(refresh_sec))
@@ -38,19 +47,29 @@ class EcowittLanMapper:
     async def async_start(self) -> None:
         if self._task:
             return
-        self._session = ClientSession(timeout=self._timeout)
+        self._session = async_create_clientsession(self._hass, timeout=self._timeout)
         self._task = asyncio.create_task(self._runner())
 
     async def async_stop(self) -> None:
-        if self._task:
-            self._task.cancel()
-            self._task = None
+        task = self._task
+        self._task = None
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
         if self._session:
             await self._session.close()
             self._session = None
 
     def sensors(self) -> Dict[str, SensorItem]:
-        return self._sensors
+        return dict(self._sensors)
+
+    def lookup(self, hwid: str) -> Optional[SensorItem]:
+        if not hwid:
+            return None
+        return self._sensors.get(hwid.upper())
 
     async def _runner(self) -> None:
         try:
@@ -103,5 +122,10 @@ class EcowittLanMapper:
 
         if sensors:
             self._sensors = sensors
-            _LOGGER.info("[LAN] mapped %d sensors: %s",
-                         len(sensors), ", ".join(sorted(sensors.keys())))
+            _LOGGER.info(
+                "[LAN] mapped %d sensors: %s",
+                len(sensors),
+                ", ".join(sorted(sensors.keys())),
+            )
+        elif self._sensors:
+            _LOGGER.debug("[LAN] No sensors returned, keeping previous map")
