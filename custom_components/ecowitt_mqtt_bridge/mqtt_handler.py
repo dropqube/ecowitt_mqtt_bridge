@@ -487,9 +487,6 @@ class EcowittBridgeRuntime:
             _LOGGER.debug("[RECV] topic=%s bytes=%d sample='%s...'", topic, len(payload), text[:80])
             await self._handle_flat_gateway(raw)
 
-        # Publish availability upfront (Home Assistant 2025 guideline) so HA
-        # immediately knows the bridge is awaiting data after a restart.
-        await self._publish_availability(False)
         self._unsub = await mqtt.async_subscribe(self.hass, self.in_topic, _msg_received, qos=0)
         _LOGGER.info("[MQTT] Subscribed to %s", self.in_topic)
         if self._lan:
@@ -499,9 +496,8 @@ class EcowittBridgeRuntime:
         if self._unsub:
             self._unsub()
             self._unsub = None
-        # Always publish offline on shutdown to clear retained online state if no
-        # new payloads arrive after unloading the integration.
-        await self._publish_availability(False)
+        if self._availability_online:
+            await self._publish_availability(False)
         if self._lan:
             await self._lan.async_stop()
 
