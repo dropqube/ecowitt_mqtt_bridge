@@ -1,8 +1,8 @@
 # Ecowitt MQTT Bridge (Custom Integration)
 # WARNING: THIS IS IN ALPHA STAGE - IT WORKS BUT IT'S NOT MEANT FOR "EASY USE" :WARNING - EXPERIENCED USERS ONLY
 
-PERSONALLY I RECOMMEND USING THE ADD-ON - I PREFER THE OUTPUT OF DEVICES TO THIS ATTEMPT
-YOU CAN FIND THE ADD-ON VERSION HERE: https://github.com/dropqube/ecowitt_mqtt_addon
+# PERSONALLY I RECOMMEND USING THE ADD-ON - I PREFER THE OUTPUT OF DEVICES TO THIS ATTEMPT
+# YOU CAN FIND THE ADD-ON VERSION HERE: https://github.com/dropqube/ecowitt_mqtt_addon
 
 A lightweight **Home Assistant integration** that listens to **Ecowitt flat MQTT uploads**
 (e.g. from GW1100, GW2000, GW3000) and publishes **MQTT Discovery sensors** automatically.
@@ -128,6 +128,7 @@ sensor.ecowitt_gateway_785133_uv_index
 
 
 MIT License © 2025 dropqube
+
 
 
 
